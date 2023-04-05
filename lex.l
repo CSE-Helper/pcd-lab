@@ -61,3 +61,11 @@ return 0;
 {
 return 0;
 }
+
+
+
+/*Output:
+C:\Users\16cseb47\Desktop\pcd>flex first.l
+C:\Users\16cseb47\Desktop\pcd>gcc lex.yy.c
+C:\Users\16cseb47\Desktop\pcd>a.exe second.c*/
+
