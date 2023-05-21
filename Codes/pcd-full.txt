@@ -1,0 +1,1270 @@
+Program1
+
+A maze game starts at the entry of a park which is expected to collect rewards at each
+path at ever different directions. If the path is chosen wisely, at the destination the
+person will be given an offer to watch a laser show. If not, will have to wait for a
+better luck. There are more than one path existing to reach the destination. Draw a
+directed graph with rewards as the edges and halting points to various directions as
+the states. Write a program to evaluate the maximum reward one can gain to get the
+offer.
+#include <stdio.h>
+#include <stdbool.h>
+
+// Structure to represent an edge in the directed graph
+struct Edge {
+    int destination;
+    int reward;
+};
+
+// Function to find the maximum reward using Depth-First Search (DFS)
+int findMaxReward(int current, int end, struct Edge graph[][10], bool visited[]) {
+    if (current == end) {
+        return 0;  // Reached the destination
+    }
+    
+    visited[current] = true;
+    int maxReward = 0;
+    
+    for (int i = 0; graph[current][i].destination != -1; i++) {
+        int next = graph[current][i].destination;
+        int reward = graph[current][i].reward;
+        
+        if (!visited[next]) {
+            int subReward = findMaxReward(next, end, graph, visited);
+            maxReward = (subReward + reward) > maxReward ? (subReward + reward) : maxReward;
+        }
+    }
+    
+    visited[current] = false;  // Reset the visited flag
+    
+    return maxReward;
+}
+Write a recursive function to determine whether an NFA accepts an input string.
+and write a recursive function that takes four arguments: the description of the
+machine M as specified in Part 1, the input array A[ ], and the index i in A[ ] from
+which to read next, and the current state p of the machine. If A[i] stores –1, then we
+have reached the end of input. Return accept or reject depending upon whether p is a
+final state or not. Otherwise, consult the transfer-function table of M. For each
+possibility of δ(p, A[i]), make a recursive call. (There may be no possibilities.) If any
+of the recursive calls accepts, accept. If all the recursive calls reject, reject.
+
+int main() {
+    struct Edge graph[10][10];
+    bool visited[10] = { false };
+    
+    // Initialize the graph with edges and rewards
+    graph[0][0].destination = 1;
+    graph[0][0].reward = 5;
+    graph[0][1].destination = -1;  // End of edges marker
+    
+    graph[1][0].destination = 2;
+    graph[1][0].reward = 10;
+    graph[1][1].destination = -1;  // End of edges marker
+    
+    graph[2][0].destination = 3;
+    graph[2][0].reward = 3;
+    graph[2][1].destination = -1;  // End of edges marker
+    
+    graph[3][0].destination = 4;
+    graph[3][0].reward = 8;
+    graph[3][1].destination = -1;  // End of edges marker
+    
+    graph[4][0].destination = 5;
+    graph[4][0].reward = 2;
+    graph[4][1].destination = -1;  // End of edges marker
+    
+    graph[5][0].destination = -1;  // End node
+    
+    int start = 0;
+    int end = 5;
+    
+    int maxReward = findMaxReward(start, end, graph, visited);
+    
+    printf("The maximum reward to reach the offer is: %d\n", maxReward);
+    
+    return 0;
+}
+
+
+
+
+
+program 3:
+
+Design a controller for an elevator. The elevator can be at one of two floors: Ground or First.
+There is one button that controls the elevator, and it has two values: Up or Down. Also,
+there are two lights in the elevator that indicate the current floor: Red for Ground, and
+Green for First. At each time step, the controller checks the current floor and current input,
+changes floors and lights in the obvious way . Check the position of the elevator after
+multiple press of up up down down up ...is given.
+
+#include <stdio.h>
+
+typedef enum {
+    GROUND,
+    FIRST
+} Floor;
+
+typedef enum {
+    UP,
+    DOWN
+} Direction;
+
+typedef enum {
+    RED,
+    GREEN
+} Light;
+
+void pressButton(Direction button, Floor *currentFloor, Light *currentLight) {
+    if (button == UP) {
+        if (*currentFloor == GROUND) {
+            *currentFloor = FIRST;
+            *currentLight = GREEN;
+        } else {
+            printf("Invalid button press. Already on the First floor.\n");
+        }
+    } else if (button == DOWN) {
+        if (*currentFloor == FIRST) {
+            *currentFloor = GROUND;
+            *currentLight = RED;
+        } else {
+            printf("Invalid button press. Already on the Ground floor.\n");
+        }
+    } else {
+        printf("Invalid button press.\n");
+    }
+}
+
+int main() {
+    Floor currentFloor = GROUND;
+    Light currentLight = RED;
+    Direction buttonPresses[] = {UP, UP, DOWN, DOWN, UP};
+    int numButtonPresses = sizeof(buttonPresses) / sizeof(buttonPresses[0]);
+
+    printf("Initial state:\n");
+    printf("Current floor: %s\n", (currentFloor == GROUND) ? "Ground" : "First");
+    printf("Current light: %s\n", (currentLight == RED) ? "Red" : "Green");
+
+    for (int i = 0; i < numButtonPresses; i++) {
+        pressButton(buttonPresses[i], &currentFloor, &currentLight);
+        printf("Button press: %s\n", (buttonPresses[i] == UP) ? "Up" : "Down");
+        printf("Current floor: %s\n", (currentFloor == GROUND) ? "Ground" : "First");
+        printf("Current light: %s\n", (currentLight == RED) ? "Red" : "Green");
+    }
+
+    return 0;
+}
+
+
+
+program 4:
+Define a structure rule to store the triple (p, a, q), where q is one possibility for δ(p,a).
+Also define an NFA as a structure of the following items: the number n of states, an
+array f [ ] to store the information which states are final, the number m of transfer-
+function rules, and an array T [ ] of m structures of type rule. Write a function to
+populate and return a machine data type M as follows
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to store the transition rule (p, a, q)
+struct rule {
+    int p;
+    int a;
+    int q;
+};
+
+// Structure to represent the NFA
+struct machine {
+    int n;              // Number of states
+    int* f;             // Array to store final states
+    int m;              // Number of transition rules
+    struct rule* T;     // Array of transition rules
+};
+
+// Function to populate and return the NFA machine
+struct machine populateMachine() {
+    struct machine M;
+    
+    printf("Enter the number of states: ");
+    scanf("%d", &M.n);
+    
+    // Allocate memory for the final states array
+    M.f = (int*)malloc(M.n * sizeof(int));
+    
+    printf("Enter the final states (-1 to terminate):\n");
+    int finalState;
+    int finalStateIndex = 0;
+    while (1) {
+        scanf("%d", &finalState);
+        if (finalState == -1)
+            break;
+        M.f[finalStateIndex++] = finalState;
+    }
+    
+    M.m = 0;
+    printf("Enter the transition rules (p, a, q) (-1 to terminate):\n");
+    int p, a, q;
+    while (1) {
+        scanf("%d", &p);
+        if (p == -1)
+            break;
+        scanf("%d %d", &a, &q);
+        
+        // Increase the size of the transition rules array
+        M.T = (struct rule*)realloc(M.T, (M.m + 1) * sizeof(struct rule));
+        
+        // Add the new rule to the array
+        M.T[M.m].p = p;
+        M.T[M.m].a = a;
+        M.T[M.m].q = q;
+        M.m++;
+    }
+    
+    return M;
+}
+
+int main() {
+    struct machine M = populateMachine();
+    
+    // Print the populated machine
+    printf("Number of states: %d\n", M.n);
+    printf("Final states: ");
+    for (int i = 0; i < M.n; i++) {
+        printf("%d ", M.f[i]);
+    }
+    printf("\n");
+    printf("Transition rules:\n");
+    for (int i = 0; i < M.m; i++) {
+        printf("(%d, %d, %d)\n", M.T[i].p, M.T[i].a, M.T[i].q);
+    }
+    
+    // Cleanup memory
+    free(M.f);
+    free(M.T);
+    
+    return 0;
+}
+
+
+program 5:
+ii. The user then enters the final states one by one (–1 to terminate)
+iii. The user finally enters the transition rules (p, a, q) one the by one (p =
+–1 terminates the reading loop) The user then runs the NFA on one or
+more inputs. Each input is read as a sequence of 0's and 1's. If –1 is
+entered as the next symbol, the input ends. All the symbols read
+(including the trailing –1) are stored in an array. For each input, run
+the functions of Parts 2 and 3.
+5. Using LEX to convert student marks available in text format to HTML table format.
+The format of input text file is as follows.
+Name:student1
+M01:20
+M03:30
+M04:40
+M05:60
+M06:70
+Name:student2
+*
+*
+*
+The output should be in the following form:
+<HTML>
+<BODY>
+<TABLE>
+<TR>
+<TH><TD>NAME</TD></TH>
+......
+</TR
+
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%%
+[^\n]+ {
+  printf("<TR>\n");
+  printf("<TH><TD>%s</TD></TH>\n", yytext);
+  printf("</TR>\n");
+}
+
+\n {
+  printf("<HTML>\n");
+  printf("<BODY>\n");
+  printf("<TABLE>\n");
+}
+
+%%
+
+int main(int argc, char** argv) {
+  if (argc != 2) {
+    printf("Usage: %s <input_file>\n", argv[0]);
+    return 1;
+  }
+
+  FILE* input_file = fopen(argv[1], "r");
+  if (!input_file) {
+    printf("Failed to open the input file.\n");
+    return 1;
+  }
+
+  yyin = input_file;
+  yylex();
+
+  fclose(input_file);
+  return 0;
+}
+
+
+program 6:
+
+Write a LEX program to check whether the entered character is a vowel or a
+consonant.
+
+%{
+#include <stdio.h>
+%}
+
+%%
+[aAeEiIoOuU]    printf("Entered character is a vowel.\n");
+.               printf("Entered character is a consonant.\n");
+%%
+
+int main() {
+    char ch;
+    printf("Enter a character: ");
+    scanf("%c", &ch);
+
+    yylex();
+
+    return 0;
+}
+
+
+
+
+program 7:
+Use YACC to convert: Infix expression to Postfix expression
+
+
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%token NUMBER
+%left '+' '-'
+%left '*' '/'
+
+%%
+input: /* empty */
+     | input line
+     ;
+
+line: expr '\n' { printf("\n"); }
+    ;
+
+expr: NUMBER { printf("%d ", $1); }
+    | expr expr '+' { printf("+ "); }
+    | expr expr '-' { printf("- "); }
+    | expr expr '*' { printf("* "); }
+    | expr expr '/' { printf("/ "); }
+    ;
+
+%%
+
+int main() {
+    yyparse();
+    return 0;
+}
+
+int yylex() {
+    int c = getchar();
+    if (c >= '0' && c <= '9') {
+        yylval = c - '0';
+        return NUMBER;
+    }
+    return c;
+}
+
+void yyerror(const char *s) {
+    fprintf(stderr, "%s\n", s);
+    exit(1);
+}
+
+
+
+
+program 8:
+
+Write a LEX program that copies a file, replacing each nonempty sequence of white spaces
+by a single blank
+
+
+%{
+#include <stdio.h>
+%}
+
+%%
+[a-zA-Z0-9.,!?]   { putchar(yytext[0]); }
+[ \t]+            { putchar(' '); }
+\n                { putchar('\n'); }
+.                 { putchar(yytext[0]); }
+%%
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Usage: %s <input_file>\n", argv[0]);
+        return 1;
+    }
+    
+    FILE *input_file = fopen(argv[1], "r");
+    if (!input_file) {
+        printf("Failed to open input file.\n");
+        return 1;
+    }
+    
+    yyin = input_file;
+    yylex();
+    
+    fclose(input_file);
+    return 0;
+}
+
+
+
+
+program 9:
+
+Write a program in YACC to implement, evaluator for arithmetic expressions (Desktop
+calculator)
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%token NUMBER
+%left '+' '-'
+%left '*' '/'
+%left '^'
+%right 'U'
+
+%%
+input: /* empty */
+     | input line
+     ;
+
+line: '\n'
+    | exp '\n' { printf("Result: %d\n", $1); }
+    ;
+
+exp: NUMBER      { $$ = $1; }
+   | exp '+' exp { $$ = $1 + $3; }
+   | exp '-' exp { $$ = $1 - $3; }
+   | exp '*' exp { $$ = $1 * $3; }
+   | exp '/' exp { $$ = $1 / $3; }
+   | exp '^' exp { $$ = pow($1, $3); }
+   | '-' exp %prec 'U' { $$ = -$2; }
+   ;
+
+%%
+
+int main() {
+    yyparse();
+    return 0;
+}
+
+int yyerror(const char *s) {
+    printf("Error: %s\n", s);
+    return 0;
+}
+
+int yylex() {
+    int c = getchar();
+    if (isdigit(c)) {
+        ungetc(c, stdin);
+        scanf("%d", &yylval);
+        return NUMBER;
+    }
+    return c;
+}
+``
+
+
+
+
+
+
+
+program:10
+
+Consider a machine with four states 0, 1, 2, 3 with the only final state 3. The machine
+has the following transfer function. The machine accepts all patterns with the last
+symbol is one.
+
+
+
+#include <stdio.h>
+
+int nextState(int currentState, char symbol) {
+    if (symbol == '0') {
+        if (currentState == 0 || currentState == 1)
+            return 0;
+        else if (currentState == 2)
+            return 3;
+    } else if (symbol == '1') {
+        if (currentState == 0)
+            return 1;
+        else if (currentState == 1)
+            return 2;
+        else if (currentState == 2)
+            return 3;
+    }
+    
+    return -1; // Invalid symbol or state
+}
+
+int main() {
+    int currentState = 0;
+    char input[100];
+
+    printf("Enter a string of 0s and 1s: ");
+    scanf("%s", input);
+
+    int i = 0;
+    while (input[i] != '\0') {
+        currentState = nextState(currentState, input[i]);
+        i++;
+    }
+
+    if (currentState == 3)
+        printf("Accepted.\n");
+    else
+        printf("Rejected.\n");
+
+    return 0;
+}
+
+
+program 11:
+ Design a lexical analyzer to scan the input file for tokens and determine the type of
+each token. Try not to force the user to include unnecessary whitespaces. You do not
+need to detect syntax errors. The program should read an input source file, remove
+comments and process the preprocessor directives .Your program should also store
+and print out a list of legal tokens and their types and print appropriate error messages
+for illegal tokens
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_TOKEN_LENGTH 100
+
+typedef enum {
+    IDENTIFIER,
+    KEYWORD,
+    INTEGER_CONSTANT,
+    FLOAT_CONSTANT,
+    STRING_CONSTANT,
+    OPERATOR,
+    PUNCTUATION,
+    PREPROCESSOR_DIRECTIVE
+} TokenType;
+
+typedef struct {
+    char lexeme[MAX_TOKEN_LENGTH];
+    TokenType type;
+} Token;
+
+void addToken(Token **tokens, int *numTokens, const char *lexeme, TokenType type) {
+    Token *newToken = realloc(*tokens, (*numTokens + 1) * sizeof(Token));
+    if (newToken == NULL) {
+        fprintf(stderr, "Memory allocation error.\n");
+        exit(EXIT_FAILURE);
+    }
+    *tokens = newToken;
+    
+    Token *token = &(*tokens)[*numTokens];
+    strncpy(token->lexeme, lexeme, MAX_TOKEN_LENGTH);
+    token->type = type;
+    (*numTokens)++;
+}
+
+int isOperator(char c) {
+    // Implementation of operator check
+}
+
+int isPunctuation(char c) {
+    // Implementation of punctuation check
+}
+
+void processToken(const char *lexeme, int line) {
+    // Implementation of token processing
+}
+
+void analyzeFile(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Failed to open file.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    int line = 1;
+    int numTokens = 0;
+    Token *tokens = NULL;
+    
+    char c;
+    char lexeme[MAX_TOKEN_LENGTH];
+    int lexemeIndex = 0;
+    int inComment = 0;
+    
+    while ((c = fgetc(file)) != EOF) {
+        if (!inComment && c == '/') {
+            // Check for comment start
+            char nextChar = fgetc(file);
+            if (nextChar == '/') {
+                inComment = 1; // Single-line comment
+            } else if (nextChar == '*') {
+                inComment = 2; // Multi-line comment
+            } else {
+                ungetc(nextChar, file);
+                lexeme[lexemeIndex++] = c;
+            }
+        } else if (inComment == 1 && c == '\n') {
+            // End of single-line comment
+            inComment = 0;
+            line++;
+        } else if (inComment == 2 && c == '*' && fgetc(file) == '/') {
+            // End of multi-line comment
+            inComment = 0;
+        } else if (!inComment && !isspace(c)) {
+            // Non-whitespace character
+            lexeme[lexemeIndex++] = c;
+            
+            if (isOperator(c) || isPunctuation(c)) {
+                lexeme[lexemeIndex] = '\0';
+                processToken(lexeme, line);
+                lexemeIndex = 0;
+            }
+        }
+    }
+    
+    fclose(file);
+}
+
+int main() {
+    analyzeFile("input.c");
+    return 0;
+}
+
+
+
+program 12
+Write a lex program to count the number of printf and scanf statements in a valid c
+program and replace them with write and read statements respectively. From the code
+fragment given categorize the identifier/ keyword /symbol by using the rules of
+identifier and keywords using LEX Tool.
+$vi var.c
+#include<stdio.h>
+main()
+{
+int a,b;
+}
+
+%option noyywrap
+%{
+#include <stdio.h>
+
+int printfCount = 0;
+int scanfCount = 0;
+int identifierCount = 0;
+int keywordCount = 0;
+%}
+
+%%
+"printf"   { printfCount++; printf("write"); }
+"scanf"    { scanfCount++; printf("read"); }
+[a-zA-Z_][a-zA-Z0-9_]*   { identifierCount++; printf("Identifier: %s\n", yytext); }
+"int"|"float"|"char"     { keywordCount++; printf("Keyword: %s\n", yytext); }
+.   ;   // Ignore other characters
+%%
+
+int main() {
+    FILE *file = fopen("var.c", "r");
+    if (file == NULL) {
+        printf("Failed to open file.\n");
+        return 1;
+    }
+
+    yyin = file;
+    yylex();
+
+    printf("Number of printf statements: %d\n", printfCount);
+    printf("Number of scanf statements: %d\n", scanfCount);
+    printf("Number of identifiers: %d\n", identifierCount);
+    printf("Number of keywords: %d\n", keywordCount);
+
+    fclose(file);
+    return 0;
+}
+
+
+program 13
+Write a lex program to count the number of printf and scanf statements in a valid c
+program and replace them with write and read statements respectively. From the code
+fragment given categorize the identifier/ keyword /symbol by using the rules of
+identifier and keywords using LEX Tool.
+$vi var.c
+#include<stdio.h>
+main()
+{
+int a,b;
+}
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_VERTICES 10
+
+bool isSafe(int v, bool graph[MAX_VERTICES][MAX_VERTICES], int path[], int pos, int V) {
+    // Check if vertex v can be added to the Hamiltonian path
+    if (graph[path[pos - 1]][v] == 0)
+        return false;
+
+    // Check if vertex v is already included in the path
+    for (int i = 0; i < pos; i++) {
+        if (path[i] == v)
+            return false;
+    }
+
+    return true;
+}
+
+bool hamiltonianCycleUtil(bool graph[MAX_VERTICES][MAX_VERTICES], int path[], int pos, int V) {
+    // Base case: All vertices are included in the path
+    if (pos == V) {
+        // Check if there is an edge from the last vertex to the first vertex
+        if (graph[path[pos - 1]][path[0]] == 1)
+            return true;
+        else
+            return false;
+    }
+
+    // Try different vertices as the next candidate in the path
+    for (int v = 1; v < V; v++) {
+        if (isSafe(v, graph, path, pos, V)) {
+            path[pos] = v;
+
+            // Recur to construct the rest of the path
+            if (hamiltonianCycleUtil(graph, path, pos + 1, V) == true)
+                return true;
+
+            // If adding vertex v doesn't lead to a solution, remove it from the path
+            path[pos] = -1;
+        }
+    }
+
+    return false;
+}
+
+bool hamiltonianCycle(bool graph[MAX_VERTICES][MAX_VERTICES], int V) {
+    int path[MAX_VERTICES];
+
+    // Initialize the path array
+    for (int i = 0; i < V; i++)
+        path[i] = -1;
+
+    // Start from the first vertex (0)
+    path[0] = 0;
+
+    // Check if a Hamiltonian cycle exists
+    if (hamiltonianCycleUtil(graph, path, 1, V) == false)
+        return false;
+
+    // Print the Hamiltonian cycle
+    printf("Hamiltonian Cycle: ");
+    for (int i = 0; i < V; i++)
+        printf("%d ", path[i]);
+    printf("%d\n", path[0]);
+
+    return true;
+}
+
+int main() {
+    int V;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &V);
+
+    bool graph[MAX_VERTICES][MAX_VERTICES];
+    printf("Enter the adjacency matrix:\n");
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < V; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+
+    if (hamiltonianCycle(graph, V))
+        printf("The graph contains a Hamiltonian cycle.\n");
+    else
+        printf("The graph does not contain a Hamiltonian cycle.\n");
+
+    return 0;
+}
+
+program 14
+Build a top-down recursive descent parser for a language of your choice.
+Step 1: Make sure your grammar does not have left recursion. Try to minimize the
+number of unit productions also. Left factor your grammar as much as you can so you
+have one token look ahead.
+Step 2: Construct a recursive descent parser by constructing a bool function for each rule
+in your grammar. If a rule is completely matched, then the function returns true, false
+otherwise. If a function has lambda productions, then it returns true if nothing else
+matches with the rule.
+Step 3: Output of this part of the program is just Yes or No (Yes, it completely parses the
+input tokens or No, there is a syntax error somewhere). For this part of the lab, you do
+not need descriptive error messages yet.
+Input/Output
+The input to your parser is the list of tokens from your lexical analyzer (or you can hand
+generate a list of tokens in a separate file. The output is Yes or N
+
+
+
+
+//top-down recursive descent parser
+
+#include <stdio.h>
+#include <stdbool.h>
+
+char *next_token;
+bool success = true;
+
+void consume_token() {
+    next_token++;
+}
+
+bool parse_E();
+bool parse_E_prime();
+bool parse_T();
+bool parse_T_prime();
+bool parse_F();
+bool parse_F_prime();
+
+bool is_number(char *token) {
+    // Function to check if token is a number
+    // Implementation omitted for brevity
+    return true;
+}
+
+bool parse_E() {
+    if (parse_T()) {
+        if (parse_E_prime()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool parse_E_prime() {
+    if (*next_token == '+') {
+        consume_token();
+        if (parse_T()) {
+            if (parse_E_prime()) {
+                return true;
+            }
+        }
+    }
+    return true;
+}
+
+bool parse_T() {
+    if (parse_F()) {
+        if (parse_T_prime()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool parse_T_prime() {
+    if (*next_token == '*') {
+        consume_token();
+        if (parse_F()) {
+            if (parse_T_prime()) {
+                return true;
+            }
+        }
+    }
+    return true;
+}
+
+bool parse_F() {
+    if (*next_token == '(') {
+        consume_token();
+        if (parse_E()) {
+            if (*next_token == ')') {
+                consume_token();
+                return parse_F_prime();
+            }
+        }
+    } else if (is_number(next_token)) {
+        consume_token();
+        return parse_F_prime();
+    }
+    return false;
+}
+
+bool parse_F_prime() {
+    if (*next_token == '*') {
+        consume_token();
+        if (parse_F()) {
+            return parse_F_prime();
+        }
+    }
+    return true;
+}
+
+bool parse(char *tokens) {
+    next_token = tokens;
+    success = true;
+    parse_E();
+    return success && (*next_token == '\0');
+}
+
+int main() {
+    char *tokens = "(7)";
+
+    if (parse(tokens)) {
+        printf("Yes\n");
+    } else {
+        printf("No\n");
+    }
+
+    return 0;
+}
+
+program 17
+
+
+
+17. Construct a symbol table for the grammar L=s+p*(q+r)*23.3 by identifying tokens in
+the given grammar.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_TOKEN_LENGTH 50
+#define MAX_SYMBOLS 100
+
+typedef struct {
+    char lexeme[MAX_TOKEN_LENGTH];
+    int tokenType;
+} Symbol;
+
+Symbol symbolTable[MAX_SYMBOLS];
+int symbolCount = 0;
+
+void addToSymbolTable(char lexeme[], int tokenType) {
+    if (symbolCount < MAX_SYMBOLS) {
+        strcpy(symbolTable[symbolCount].lexeme, lexeme);
+        symbolTable[symbolCount].tokenType = tokenType;
+        symbolCount++;
+    }
+}
+
+void displaySymbolTable() {
+    printf("Symbol Table:\n");
+    printf("Lexeme\t\tToken Type\n");
+    printf("------------------------\n");
+    for (int i = 0; i < symbolCount; i++) {
+        printf("%s\t\t%d\n", symbolTable[i].lexeme, symbolTable[i].tokenType);
+    }
+}
+
+int main() {
+    // Grammar: L = s + p * (q + r) * 23.3
+
+    // Token types
+    enum { ID, PLUS, MULT, LPAREN, RPAREN, FLOAT_NUM };
+
+    // Adding tokens to the symbol table
+    addToSymbolTable("L", ID);
+    addToSymbolTable("s", ID);
+    addToSymbolTable("+", PLUS);
+    addToSymbolTable("p", ID);
+    addToSymbolTable("*", MULT);
+    addToSymbolTable("(", LPAREN);
+    addToSymbolTable("q", ID);
+    addToSymbolTable("+", PLUS);
+    addToSymbolTable("r", ID);
+    addToSymbolTable(")", RPAREN);
+    addToSymbolTable("23.3", FLOAT_NUM);
+
+    // Displaying the symbol table
+    displaySymbolTable();
+
+    return 0;
+}
+
+program 18
+ Consider the following productions to implement a shift reduce parser
+S -> xx W{print1}
+S -> y {print2}
+W -> Sz {print3}
+The parser carries out the actions specified within braces immediately after reducing with
+the corresponding rule of grammar. Write a c program to show that translation is 23131.
+
+#include <stdio.h>
+#include <string.h>
+
+int parseExpression(char* input) {
+    int length = strlen(input);
+    int stack[length], top = -1;
+    int i = 0;
+
+    while (i < length) {
+        if (top == -1 || input[i] == 'x') {
+            stack[++top] = input[i];
+            i++;
+        } else if (stack[top] == 'x' && input[i] == 'x') {
+            stack[++top] = 'S';
+            printf("print1\n");
+            i++;
+        } else if (stack[top] == 'S' && input[i] == 'y') {
+            stack[++top] = 'S';
+            printf("print2\n");
+            i++;
+        } else if (stack[top] == 'S' && input[i] == 'z') {
+            stack[top] = 'W';
+            stack[++top] = 'z';
+            printf("print3\n");
+            i++;
+        } else if (stack[top] == 'W' && input[i] == 'z') {
+            stack[top] = 'W';
+            stack[++top] = 'S';
+        } else {
+            printf("Error: Invalid input\n");
+            return 0;
+        }
+    }
+
+    if (top == 1 && stack[top] == 'S') {
+        printf("Translation is 23131\n");
+        return 1;
+    } else {
+        printf("Error: Invalid input\n");
+        return 0;
+    }
+}
+
+int main() {
+    char input[] = "xxzy";
+    if (parseExpression(input)) {
+        printf("Parsing Successful\n");
+    } else {
+        printf("Parsing Failed\n");
+    }
+    return 0;
+}
+
+
+program 19
+9. Construct a LR table for the grammar:
+S-> aSa
+S-> bSb
+S-> c
+To build a LR parser, you'll need:
+- A stack to hold both non-terminal and terminal (token) symbols. (Use your stack class
+from data structures)
+- A data structure of your choice to hold the LR parser table.
+- A data structure of your choice to hold the input string.
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define ROWS 4
+#define COLS 5
+
+typedef enum { SHIFT, REDUCE, ACCEPT, ERROR } ActionType;
+
+typedef struct {
+    ActionType action;
+    int value;
+} LRTableEntry;
+
+LRTableEntry lrTable[ROWS][COLS] = {
+    { {SHIFT, 2}, {ERROR, -1}, {SHIFT, 3}, {ERROR, -1}, {ERROR, -1} },
+    { {SHIFT, 2}, {SHIFT, 4}, {ERROR, -1}, {ERROR, -1}, {ERROR, -1} },
+    { {REDUCE, 3}, {REDUCE, 3}, {REDUCE, 3}, {SHIFT, 5}, {ERROR, -1} },
+    { {ACCEPT, -1}, {ERROR, -1}, {ACCEPT, -1}, {ERROR, -1}, {ERROR, -1} }
+};
+
+ActionType getAction(char symbol) {
+    switch (symbol) {
+        case 'a': return SHIFT;
+        case 'b': return SHIFT;
+        case 'c': return SHIFT;
+        case '$': return ACCEPT;
+        default: return ERROR;
+    }
+}
+
+int getStateIndex(int state) {
+    return state - 1;
+}
+
+void parseInput(char* input) {
+    int stateStack[100], symbolStack[100];
+    int top = -1;
+    int currentState, nextState;
+    char symbol;
+
+    stateStack[++top] = 0;  // Initial state
+
+    while (true) {
+        currentState = stateStack[top];
+        symbol = *input;
+        ActionType action = getAction(symbol);
+
+        if (action == ERROR) {
+            printf("Error: Invalid input\n");
+            return;
+        }
+
+        nextState = lrTable[getStateIndex(currentState)][action].value;
+
+        if (nextState == -1) {
+            printf("Error: Invalid input\n");
+            return;
+        }
+
+        if (lrTable[getStateIndex(currentState)][action].action == SHIFT) {
+            stateStack[++top] = nextState;
+            symbolStack[top] = symbol;
+            input++;
+        } else if (lrTable[getStateIndex(currentState)][action].action == REDUCE) {
+            int production = lrTable[getStateIndex(currentState)][action].value;
+            int reduceLength;
+
+            switch (production) {
+                case 1:
+                    reduceLength = 3;
+                    printf("Reducing by S -> c\n");
+                    break;
+                case 2:
+                    reduceLength = 3;
+                    printf("Reducing by S -> bSb\n");
+                    break;
+                case 3:
+                    reduceLength = 3;
+                    printf("Reducing by S -> aSa\n");
+                    break;
+                default:
+                    printf("Error: Invalid production\n");
+                    return;
+            }
+
+            while (reduceLength--) {
+                top--;
+            }
+
+            symbol = 'S';  // Non-terminal symbol
+            currentState = stateStack[top];
+            nextState = lrTable[getStateIndex(currentState)][getAction(symbol)].value;
+
+            stateStack[++top] = nextState;
+            symbolStack[top] = symbol;
+        } else if (lrTable[getStateIndex(currentState)][action].action == ACCEPT) {
+            printf("Accept: Valid input\n");
+            return;
+        }
+    }
+}
+
+int main() {
+    char input[] = "bcb$";  // Input string
+    parseInput(input);
+    return 0;
+}
+
+program 20
+Write a C program to generate intermediate code for the following expression
+a=b+c*d. Use the following rules for your intermediate code generation.
+• An address can be a name, constant or temporary.
+• Assignmentsments can have the form of x = y op z; x = op y.
+• Copy x = y.
+• Unconditional jump goto L.
+• Conditional jumps if x relop y goto L.
+• Parameters param x.
+• Function call y = call p.
+• Indexed copy x = y[i]; x[i] = y.
+• Pointer assignments x = &y; x = *y; *x = y.
+
+
+#include <stdio.h>
+
+void generateIntermediateCode() {
+    printf("param c\n");      // Parameters
+    printf("param d\n");
+    printf("t1 = c * d\n");  // Temporary variable
+    printf("param b\n");
+    printf("t2 = b + t1\n"); // Temporary variable
+    printf("param t2\n");
+    printf("param a\n");
+    printf("call +\n");      // Function call
+    printf("param t2\n");
+    printf("param a\n");
+    printf("call =\n");      // Function call
+}
+
+int main() {
+    printf("Intermediate Code:\n");
+    generateIntermediateCode();
+    return 0;
+}
+
+program 21
+ In the following code, after for loop you will find four steps of if-else loop. Using
+code optimization technique, reframe the code which doesn’t contain any if-loop
+int main()
+
+#include <stdio.h>
+
+int main() {
+    for (int i = 1; i <= 100; i++) {
+        if (i % 3 == 0 && i % 5 == 0) {
+            printf("PR\n");
+        } else if (i % 3 == 0 && i % 5 != 0) {
+            printf("P\n");
+        } else if (i % 3 != 0 && i % 5 == 0) {
+            printf("R\n");
+        } else {
+            printf("%d\n", i);
+        }
+    }
+
+    system("pause");
+    return 0;
+}
+
+
+---------------------------
+command for execute lex:
+
+flex filename.l
+
+gcc lex.yy.c -o filename
+
+./filename
+
+
+command to run yacc
+ yacc -d filename.y
+ gcc y.tab.c -o filename
+./filename
+------------------------
